@@ -1,18 +1,19 @@
 {
-  "name": "inputman",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "packageManager": "pnpm@10.11.1",
-  "dependencies": {
-    "tsup": "^8.5.0",
-    "typescript": "^5.8.3",
-    "vitest": "^3.2.3"
-  }
+	"name": "inputman",
+	"version": "1.0.0",
+	"description": "",
+	"type": "module",
+	"scripts": {
+		"build": "tsup",
+		"test": "vitest"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"packageManager": "pnpm@10.11.1",
+	"dependencies": {
+		"tsup": "^8.5.0",
+		"typescript": "^5.8.3",
+		"vitest": "^3.2.3"
+	}
 }
