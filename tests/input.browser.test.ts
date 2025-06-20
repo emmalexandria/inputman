@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
 import { userEvent } from "@vitest/browser/context"
-import { InputMan } from "../src/input";
+import { InputMan } from "../src/manager";
 
 test("Test basic binding", async () => {
 	const inputMan = new InputMan()
