@@ -1,15 +1,7 @@
 import type { Input, Key } from "./input";
 import { arrayContainsOrd } from "./util";
 
-const ScrollDown = "MouseScrollDown";
-const ScrollUp = "MouseScrollUp";
-const MouseOne = "MouseOne";
-const MouseTwo = "MouseTwo";
-const MouseThree = "MouseThree";
-const MouseFour = "MouseFour";
-const MouseFive = "MouseFive";
-
-export type BindingFn = (key: Key) => void;
+export type BindingFn = () => void;
 
 export interface IBinding {
 	fn: BindingFn,
@@ -19,6 +11,7 @@ export interface IBinding {
 export class Binding implements IBinding {
 	fn: BindingFn;
 	value?: number;
+	sequential: boolean = false;
 	keys: string[];
 	name?: string;
 
@@ -89,6 +82,8 @@ export function createBinding(binding: string, fn: BindingFn, name?: string): Bi
 	let keys = splitBindingStringEscaped(binding);
 	return new Binding(keys, fn, name);
 }
+
+
 
 
 

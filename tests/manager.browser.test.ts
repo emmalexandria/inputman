@@ -5,7 +5,7 @@ import { InputMan } from "../src/manager";
 test("Test basic binding", async () => {
 	const inputMan = new InputMan()
 	let pressed = false
-	const success = inputMan.registerBindingString("KeyD", () => {
+	const success = inputMan.registerBinding("KeyD", () => {
 		pressed = true
 	})
 
@@ -20,7 +20,7 @@ test("Test multi-key binding", async () => {
 
 	let pressed = false;
 
-	const success = inputMan.registerBindingString("ShiftLeft+KeyE", () => {
+	const success = inputMan.registerBinding("ShiftLeft+KeyE", () => {
 		pressed = true;
 	})
 
@@ -35,10 +35,30 @@ test("Test mouse binding", async () => {
 
 	let pressed = false;
 
-	const success = inputMan.registerBindingString("Mouse1+KeyE", () => pressed = true)
+	const success = inputMan.registerBinding("Mouse1+KeyE", () => pressed = true)
 
 	expect(success).toStrictEqual(true);
 	await Promise.all([userEvent.click(page.getByRole('document')), userEvent.keyboard('[KeyE]')])
 
 	expect(pressed).toStrictEqual(true)
+})
+
+test("Test keyboard input callback", async () => {
+	const inputMan = new InputMan();
+
+	let keys: string[] = []
+
+	inputMan.registerButtonCallback((c) => {
+		keys.push(c.button?.code ?? "undefined")
+	})
+
+	await userEvent.keyboard("[ShiftLeft][KeyE]")
+
+	expect(keys).toStrictEqual(["ShiftLeft", "KeyE"])
+})
+
+
+// Unfortunately, we don't currently have a way to test mouse movement to my knowledge. Test is left as a reminder.
+test("Test mouse movement callbacks", async () => {
+
 })

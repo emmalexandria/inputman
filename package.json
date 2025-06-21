@@ -1,7 +1,7 @@
 {
 	"name": "inputman",
-	"version": "0.0.2",
-	"description": "",
+	"version": "0.0.3",
+	"description": "A simple input manager for the web. No dependencies, as small as possible, and easy to use.",
 	"type": "module",
 	"scripts": {
 		"build": "tsup",
@@ -16,9 +16,21 @@
 			"types": "./dist/index.d.ts"
 		}
 	},
-	"keywords": [],
-	"author": "",
+	"keywords": [
+		"input",
+		"keyboard",
+		"mouse",
+		"manager",
+		"dom",
+		"vitest",
+		"typescript"
+	],
+	"author": "Emma Alexandria <emma.jellemabutler@gmail.com> (https://emmalexandria.dev)",
 	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/emmalexandria/inputman"
+	},
 	"packageManager": "pnpm@10.11.1",
 	"dependencies": {
 		"tsup": "^8.5.0",

@@ -6,5 +6,6 @@ export default defineConfig({
 	clean: true,
 	minify: true,
 	outDir: "./dist",
+	sourcemap: true,
 	dts: true
 })

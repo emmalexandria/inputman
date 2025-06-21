@@ -1,5 +1,6 @@
 import { createBinding, type BindingFn, type IBinding } from "./bindings";
 import { getMouseButtonName, type Key } from "./input";
+import type { Vector2 } from "./types";
 
 // Nasty little hack required because addEventListener on window doesn't infer the correct event type
 function addWindowEventListener<K extends keyof WindowEventMap>(
@@ -12,27 +13,43 @@ function addWindowEventListener<K extends keyof WindowEventMap>(
 
 export type InputEventCallback = (event: InputEvent) => void;
 
+export interface ButtonEvent {
+	code: string
+	up: boolean
+}
+
+export interface MoveEvent {
+	delta: Vector2
+	current: Vector2
+}
 
 export interface InputEvent {
-	key: Key;
-	up: boolean;
+	button?: ButtonEvent,
+	move?: MoveEvent,
 	shift: boolean,
 	ctrl: boolean,
 	alt: boolean,
 	meta: boolean
 }
 
+export interface InputManConfig {
+	preventsDefault?: boolean;
+	maxSequenceLength?: number
+}
+
 
 export class InputMan {
 	private pressedKeys: Set<Key> = new Set();
 	private keySequence: Key[] = [];
-	private maxSequenceLength = 10;
+	private maxSequenceLength;
 	private bindings: Set<IBinding> = new Set();
 	private keyboardCallbacks: Set<InputEventCallback> = new Set();
+	private mouseCallbacks: Set<InputEventCallback> = new Set();
 	private preventsDefault: boolean;
 
-	constructor(preventsDefault = true) {
-		this.preventsDefault = preventsDefault;
+	constructor(config?: InputManConfig) {
+		this.preventsDefault = config?.preventsDefault ?? false;
+		this.maxSequenceLength = config?.maxSequenceLength ?? 5;
 
 		this.handleKeyDown = this.handleKeyDown.bind(this);
 		this.handleKeyUp = this.handleKeyUp.bind(this);
@@ -56,7 +73,7 @@ export class InputMan {
 		return Array.from(this.pressedKeys).find((k) => k.key === key) ? true : false
 	}
 
-	registerBindingString(binding: string, fn: BindingFn): boolean {
+	registerBinding(binding: string, fn: BindingFn): boolean {
 		const bindingObj = createBinding(binding, fn);
 		if (bindingObj) {
 			this.bindings.add(bindingObj);
@@ -66,19 +83,29 @@ export class InputMan {
 		return false;
 	}
 
-	registerKeyboardCallback(callback: InputEventCallback) {
+	registerButtonCallback(callback: InputEventCallback) {
 		this.keyboardCallbacks.add(callback);
+	}
+
+	registerMouseCallback(callback: InputEventCallback) {
+		this.mouseCallbacks.add(callback)
 	}
 
 	private invokeCallbacks(ev: InputEvent) {
 		// Call bindings
 		for (let binding of this.bindings) {
 			if (binding.matches(Array.from(this.pressedKeys))) {
-				binding.fn(ev.key)
+				binding.fn()
 			}
 		}
 
 		for (let callback of this.keyboardCallbacks) {
+			callback(ev)
+		}
+	}
+
+	private invokeMouseCallbacks(ev: InputEvent) {
+		for (let callback of this.mouseCallbacks) {
 			callback(ev)
 		}
 	}
@@ -105,6 +132,8 @@ export class InputMan {
 	private handleMouseMove(ev: MouseEvent) {
 		if (this.preventsDefault) ev.preventDefault();
 
+		const event = this.createMouseMoveEvent(ev)
+		this.invokeMouseCallbacks(event)
 	}
 
 	private handleMouseDown(ev: MouseEvent) {
@@ -112,7 +141,7 @@ export class InputMan {
 
 		const button = getMouseButtonName(ev.button);
 		this.pressedKeys.add({ code: button, key: button })
-		this.invokeCallbacks(this.createMouseEvent(ev, false))
+		this.invokeCallbacks(this.createMouseBtnEvent(ev, false))
 	}
 
 	private handleMouseUp(ev: MouseEvent) {
@@ -122,14 +151,11 @@ export class InputMan {
 		this.pressedKeys.delete({ code: button, key: button });
 	}
 
-	private static normalizeKey(ev: KeyboardEvent) {
-		return ev.code
-	}
+
 
 	private createKeyEvent(ev: KeyboardEvent, up: boolean): InputEvent {
 		const event: InputEvent = {
-			key: { key: ev.key, code: ev.code },
-			up,
+			button: { code: ev.code, up },
 			shift: ev.shiftKey,
 			ctrl: ev.ctrlKey,
 			alt: ev.altKey,
@@ -139,11 +165,10 @@ export class InputMan {
 		return event
 	}
 
-	private createMouseEvent(ev: MouseEvent, up: boolean): InputEvent {
+	private createMouseBtnEvent(ev: MouseEvent, up: boolean): InputEvent {
 		const button = getMouseButtonName(ev.button);
 		const event: InputEvent = {
-			key: { key: button, code: button },
-			up,
+			button: { code: button, up },
 			shift: ev.shiftKey,
 			ctrl: ev.ctrlKey,
 			alt: ev.altKey,
@@ -152,6 +177,18 @@ export class InputMan {
 		}
 
 		return event;
+	}
+
+	private createMouseMoveEvent(ev: MouseEvent): InputEvent {
+		const event: InputEvent = {
+			move: { delta: { x: ev.movementX, y: ev.movementY }, current: { x: ev.pageX, y: ev.pageY } },
+			shift: ev.shiftKey,
+			ctrl: ev.ctrlKey,
+			alt: ev.altKey,
+			meta: ev.metaKey
+		}
+
+		return event
 	}
 
 }
