@@ -19,3 +19,13 @@ export function arraysEqual<T>(array1: T[], array2: T[]): boolean {
 		return array2.includes(e)
 	})
 }
+
+// Nasty little hack required because addEventListener on window doesn't infer the correct event type
+export function addWindowEventListener<K extends keyof WindowEventMap>(
+	type: K,
+	listener: (this: Window, ev: WindowEventMap[K]) => any
+) {
+	window.addEventListener(type, listener);
+}
+
+

@@ -3,7 +3,7 @@ import { page, userEvent } from "@vitest/browser/context"
 import { InputMan } from "../src/manager";
 
 test("Test basic binding", async () => {
-	const inputMan = new InputMan()
+	const inputMan = new InputMan(window)
 	let pressed = false
 	const success = inputMan.registerBinding("KeyD", () => {
 		pressed = true
@@ -16,7 +16,7 @@ test("Test basic binding", async () => {
 })
 
 test("Test multi-key binding", async () => {
-	const inputMan = new InputMan();
+	const inputMan = new InputMan(window);
 
 	let pressed = false;
 
@@ -31,7 +31,7 @@ test("Test multi-key binding", async () => {
 })
 
 test("Test mouse binding", async () => {
-	const inputMan = new InputMan();
+	const inputMan = new InputMan(window);
 
 	let pressed = false;
 
@@ -44,7 +44,7 @@ test("Test mouse binding", async () => {
 })
 
 test("Test keyboard input callback", async () => {
-	const inputMan = new InputMan();
+	const inputMan = new InputMan(window);
 
 	let keys: string[] = []
 

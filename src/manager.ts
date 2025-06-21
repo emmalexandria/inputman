@@ -1,17 +1,13 @@
 import { createBinding, type BindingFn, type IBinding } from "./bindings";
-import { getMouseButtonName, type Key } from "./input";
+import { getMouseButtonName, InputInterceptor, InputState, type InputReceiver, type Key } from "./input";
+import { KeyboardLayer } from "./layers/keyboard";
 import type { Vector2 } from "./types";
 
-// Nasty little hack required because addEventListener on window doesn't infer the correct event type
-function addWindowEventListener<K extends keyof WindowEventMap>(
-	type: K,
-	listener: (this: Window, ev: WindowEventMap[K]) => any
-) {
-	window.addEventListener(type, listener);
-}
+
 
 
 export type InputEventCallback = (event: InputEvent) => void;
+export type ScrollCallback = (event: Event) => void;
 
 export interface ButtonEvent {
 	code: string
@@ -38,40 +34,25 @@ export interface InputManConfig {
 }
 
 
-export class InputMan {
-	private pressedKeys: Set<Key> = new Set();
-	private keySequence: Key[] = [];
-	private maxSequenceLength;
+export class InputMan implements InputReceiver {
+	private preventsDefault: boolean;
+	private interceptor: InputInterceptor;
+	private keyboard: KeyboardLayer;
+	private state: InputState;
 	private bindings: Set<IBinding> = new Set();
 	private keyboardCallbacks: Set<InputEventCallback> = new Set();
 	private mouseCallbacks: Set<InputEventCallback> = new Set();
-	private preventsDefault: boolean;
+	private scrollCallbacks: Set<ScrollCallback> = new Set();
 
-	constructor(config?: InputManConfig) {
-		this.preventsDefault = config?.preventsDefault ?? false;
-		this.maxSequenceLength = config?.maxSequenceLength ?? 5;
-
-		this.handleKeyDown = this.handleKeyDown.bind(this);
-		this.handleKeyUp = this.handleKeyUp.bind(this);
-		this.handleMouseMove = this.handleMouseMove.bind(this);
-		this.handleMouseDown = this.handleMouseDown.bind(this);
-		this.handleMouseUp = this.handleMouseUp.bind(this);
-
-		addWindowEventListener("keydown", this.handleKeyDown);
-		addWindowEventListener("keyup", this.handleKeyUp);
-
-		addWindowEventListener("mousemove", this.handleMouseMove);
-		addWindowEventListener("mousedown", this.handleMouseDown);
-		addWindowEventListener("mouseup", this.handleMouseUp);
+	constructor(target: Window | HTMLElement, config?: InputManConfig) {
+		this.preventsDefault = config?.preventsDefault ?? true;
+		this.interceptor = new InputInterceptor(this, target, config?.preventsDefault ?? false)
+		this.state = new InputState(config?.maxSequenceLength);
+		this.keyboard = new KeyboardLayer(this, target, config?.maxSequenceLength);
 	}
 
-	isPressedCode(keyCode: string): boolean {
-		return Array.from(this.pressedKeys).find((k) => k.code === keyCode) ? true : false
-	}
-
-	isPressedKey(key: string): boolean {
-		return Array.from(this.pressedKeys).find((k) => k.key === key) ? true : false
-	}
+	isPressed = (code: string) => this.state.isPressed({ code })
+	isPressedKey = (key: string) => this.state.isPressedKey({ key })
 
 	registerBinding(binding: string, fn: BindingFn): boolean {
 		const bindingObj = createBinding(binding, fn);
@@ -94,7 +75,7 @@ export class InputMan {
 	private invokeCallbacks(ev: InputEvent) {
 		// Call bindings
 		for (let binding of this.bindings) {
-			if (binding.matches(Array.from(this.pressedKeys))) {
+			if (binding.matches(Array.from(this.state.getPressedKeys()))) {
 				binding.fn()
 			}
 		}
@@ -110,48 +91,61 @@ export class InputMan {
 		}
 	}
 
-
-	private handleKeyDown(ev: KeyboardEvent) {
-		if (this.preventsDefault) ev.preventDefault();
-
-		this.pressedKeys.add({ key: ev.key, code: ev.code })
-		this.invokeCallbacks(this.createKeyEvent(ev, false))
-	}
-
-	private handleKeyUp(ev: KeyboardEvent) {
-		if (this.preventsDefault) ev.preventDefault();
-
-		this.pressedKeys.delete({ key: ev.key, code: ev.code })
-		this.keySequence.push({ key: ev.key, code: ev.code })
-		// Remove keys from key sequence from start if over max length
-		if (this.keySequence.length > this.maxSequenceLength) {
-			this.keySequence = this.keySequence.slice(this.keySequence.length - this.maxSequenceLength, this.keySequence.length)
+	private invokeScrollCallbacks(ev: Event) {
+		for (let callback of this.scrollCallbacks) {
+			callback(ev)
 		}
 	}
 
-	private handleMouseMove(ev: MouseEvent) {
-		if (this.preventsDefault) ev.preventDefault();
 
+	keyboardDown(ev: KeyboardEvent) {
+		this.state.addPressedKey({ code: ev.code, key: ev.key });
+		this.invokeCallbacks(this.createKeyEvent(ev, false));
+	}
+
+	keyboardUp(ev: KeyboardEvent) {
+		const key: Key = { key: ev.key, code: ev.code }
+		this.state.addKeyToSequence(key);
+		this.state.removePressedKey(key);
+		// Remove keys from key sequence from start if over max length
+		this.state.cullKeySequence()
+
+	}
+
+	mouseMove(ev: MouseEvent) {
 		const event = this.createMouseMoveEvent(ev)
+		this.state.updateMouse(ev);
 		this.invokeMouseCallbacks(event)
 	}
 
-	private handleMouseDown(ev: MouseEvent) {
-		if (this.preventsDefault) ev.preventDefault();
-
+	mouseDown(ev: MouseEvent) {
 		const button = getMouseButtonName(ev.button);
-		this.pressedKeys.add({ code: button, key: button })
+		this.state.addPressedKey({ code: button, key: button })
 		this.invokeCallbacks(this.createMouseBtnEvent(ev, false))
 	}
 
-	private handleMouseUp(ev: MouseEvent) {
-		if (this.preventsDefault) ev.preventDefault()
-
+	mouseUp(ev: MouseEvent) {
 		const button = getMouseButtonName(ev.button);
-		this.pressedKeys.delete({ code: button, key: button });
+		this.state.removePressedKey({ key: button, code: button });
+
+		this.state.cullKeySequence();
 	}
 
+	mouseScroll(ev: Event) {
+		this.invokeScrollCallbacks(ev);
+	};
 
+	touchStart(ev: TouchEvent) {
+
+	}
+
+	touchEnd(ev: TouchEvent) {
+
+	}
+
+	touchMove(ev: TouchEvent) {
+
+	}
 
 	private createKeyEvent(ev: KeyboardEvent, up: boolean): InputEvent {
 		const event: InputEvent = {
@@ -189,6 +183,11 @@ export class InputMan {
 		}
 
 		return event
+	}
+
+	maybePreventDefault(ev: Event): boolean {
+		if (this.preventsDefault) ev.preventDefault();
+		return this.preventsDefault;
 	}
 
 }

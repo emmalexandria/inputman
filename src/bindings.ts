@@ -1,4 +1,4 @@
-import type { Input, Key } from "./input";
+import type { Key } from "./layers/keyboard";
 import { arrayContainsOrd } from "./util";
 
 export type BindingFn = () => void;
@@ -26,8 +26,8 @@ export class Binding implements IBinding {
 	}
 }
 
-export function parseBindingString(binding: string, physical: boolean = true): Input[] {
-	const inputs: Input[] = []
+export function parseBindingString(binding: string, physical: boolean = true): Key[] {
+	const inputs: Key[] = []
 	let split: string[];
 	if (physical) {
 		split = binding.split("+").filter((s) => s.length > 0)
