@@ -5,7 +5,7 @@ export type BindingFn = () => void;
 
 export interface IBinding {
 	fn: BindingFn,
-	matches: (input: Key[]) => boolean
+	matches: (input: string[]) => boolean
 }
 
 export class Binding implements IBinding {
@@ -21,8 +21,8 @@ export class Binding implements IBinding {
 		this.name = name
 	}
 
-	matches(input: Key[]) {
-		return arrayContainsOrd(input.map((k) => k.code), this.keys)
+	matches(input: string[]) {
+		return arrayContainsOrd(input, this.keys)
 	}
 }
 

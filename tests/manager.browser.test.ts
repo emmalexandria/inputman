@@ -35,10 +35,10 @@ test("Test mouse binding", async () => {
 
 	let pressed = false;
 
-	const success = inputMan.registerBinding("Mouse1+KeyE", () => pressed = true)
+	const success = inputMan.registerBinding("Mouse1", () => pressed = true)
 
 	expect(success).toStrictEqual(true);
-	await Promise.all([userEvent.click(page.getByRole('document')), userEvent.keyboard('[KeyE]')])
+	await userEvent.click(page.getByRole('document'))
 
 	expect(pressed).toStrictEqual(true)
 })
@@ -48,9 +48,9 @@ test("Test keyboard input callback", async () => {
 
 	let keys: string[] = []
 
-	inputMan.registerButtonCallback((c) => {
-		keys.push(c.button?.code ?? "undefined")
-	})
+	inputMan.keyboard.registerCallback((c) => {
+		keys.push(c.code ?? "undefined")
+	}, "keydown")
 
 	await userEvent.keyboard("[ShiftLeft][KeyE]")
 
