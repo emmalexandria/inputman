@@ -1,3 +1,4 @@
+import type { Modifiers } from "../input";
 import type { InputMan } from "../manager";
 import { addWindowEventListener } from "../util";
 
@@ -8,16 +9,12 @@ export interface Key {
 	code?: string;
 }
 
-export interface KeyEvent {
-	key?: Key;
-	code?: string;
-	shift: boolean;
-	ctrl: boolean;
-	alt: boolean;
-	meta: boolean;
+export interface KeyboardLayerEvent {
+	key: Key;
+	modifiers: Modifiers
 }
 
-export type KeyboardCallbackFn = (ev: KeyEvent) => void;
+export type KeyboardCallbackFn = (ev: KeyboardLayerEvent) => void;
 export type KeyboardCallbackType = "keydown" | "keyup";
 
 interface KeyboardCallback {
@@ -84,12 +81,14 @@ export class KeyboardLayer {
 	}
 
 	private invokeCallbacks(ev: KeyboardEvent, type: KeyboardCallbackType) {
-		const event: KeyEvent = {
+		const event: KeyboardLayerEvent = {
 			key: { code: ev.code, key: ev.key },
-			shift: ev.shiftKey,
-			alt: ev.altKey,
-			ctrl: ev.ctrlKey,
-			meta: ev.metaKey,
+			modifiers: {
+				shift: ev.shiftKey,
+				alt: ev.altKey,
+				ctrl: ev.ctrlKey,
+				meta: ev.metaKey,
+			}
 		}
 		const filtered = this.callbacks.filter((c) => c.type === type);
 		filtered.forEach((cb) => cb.fn(event));

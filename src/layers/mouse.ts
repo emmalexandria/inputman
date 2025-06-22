@@ -1,3 +1,4 @@
+import type { Modifiers } from "../input";
 import type { InputMan } from "../manager";
 import { v2Zero, type Vector2 } from "../types";
 import { addWindowEventListener } from "../util";
@@ -10,9 +11,16 @@ interface MouseState {
 }
 
 export type MouseCallbackFn = (
-	ev: MouseEvent | Event,
+	ev: MouseLayerEvent,
 	state: MouseState,
 ) => void;
+
+export interface MouseLayerEvent {
+	ev: MouseEvent | Event;
+	button?: string;
+	modifiers?: Modifiers
+}
+
 export type MouseCallbackType =
 	| "mousedown"
 	| "mouseup"
@@ -64,8 +72,29 @@ export class MouseLayer {
 	}
 
 	private invokeCallbacks(ev: MouseEvent | Event, type: MouseCallbackType) {
+		// We have two event types here, scroll (Event) and mouse button moves/clicks (MouseEvent)
+		// So we start by just filling out the event
+		let event: MouseLayerEvent = {
+			ev
+		};
+		// And if its a MouseEvent we fill in all the additional details we have from that
+		if (ev instanceof MouseEvent) {
+			event.modifiers = {
+				shift: ev.shiftKey,
+				alt: ev.altKey,
+				ctrl: ev.ctrlKey,
+				meta: ev.metaKey
+			}
+			// Before we set the button, we check its a mouse button event and not a mouse move event
+			if (type === "mousedown" || type === "mouseup") {
+				event.button = getMouseButtonName(ev.button)
+			}
+		}
+		// Then we filter the callbacks for those which match the type of event we have
 		const filtered = this.callbacks.filter((cb) => cb.type === type);
-		filtered.forEach((cb) => cb.fn(ev, this.state));
+		// And finally we can send the event object to each callback, also passing in the MouseState which contains
+		// all the juicy details about mouse position and movement.
+		filtered.forEach((cb) => cb.fn(event, this.state));
 	}
 
 	private mouseDown(ev: MouseEvent) {
