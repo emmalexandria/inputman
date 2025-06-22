@@ -14,5 +14,5 @@ test("Test array contains ordered", () => {
 test("Test sequence culling", () => {
 	const input = ["a", "b", "c", "d", "e"];
 
-	expect(cullSequence(input, 3)).toStrictEqual(["c", "d", "e"])
-})
+	expect(cullSequence(input, 3)).toStrictEqual(["c", "d", "e"]);
+});

@@ -18,20 +18,20 @@ export interface Input<T> {
 /** Describes the configuration for the input class */
 export interface InputConfig {
 	/** How long inputs remain in the release and input sequence */
-	releaseSequenceTimer?: number,
+	releaseSequenceTimer?: number;
 	/** The maximum number of inputs in the release sequence */
-	maxReleaseSequenceLength?: number,
+	maxReleaseSequenceLength?: number;
 	/** The maximum length of the full sequence of both pressed keys and releases */
-	maxInputSequenceLength?: number,
+	maxInputSequenceLength?: number;
 }
 
-/** This class is used internally by both the input manager and the input layers to keep track of the sequence of inputs, 
- * currently pressed inputs, and the sequence in which inputs were released. It also provides code for converting 
+/** This class is used internally by both the input manager and the input layers to keep track of the sequence of inputs,
+ * currently pressed inputs, and the sequence in which inputs were released. It also provides code for converting
  * the sequence of inputs into binding descriptors for binding matches.*/
 export class Inputs<T> {
 	private _inputSequence: Array<Input<T>> = [];
 	private _pressedInputs: Set<T> = new Set();
-	private _releaseSequence: Array<T> = new Array();
+	private _releaseSequence: Array<T> = [];
 
 	private releaseTimer: number;
 	private maxReleaseSequenceLength: number;
@@ -74,14 +74,13 @@ export class Inputs<T> {
 		setTimeout(() => {
 			const idx = this._releaseSequence.findIndex((i) => i === input);
 			this._releaseSequence.slice(idx);
-		}, this.releaseTimer)
-
+		}, this.releaseTimer);
 
 		this.cullSequences();
 	}
 
 	consume(input: Input<T>[]) {
-		for (let i of input) {
+		for (const i of input) {
 			const idx = this._inputSequence.findIndex((item) => item === i);
 			if (idx) {
 				this._inputSequence.splice(idx, 1);
@@ -94,21 +93,24 @@ export class Inputs<T> {
 		const group: T[] = [];
 		const pressed: T[] = [];
 
-		for (let i of this._inputSequence) {
+		for (const i of this._inputSequence) {
 			if (i.press) {
 				pressed.push(i.input);
 			} else {
-
 			}
 		}
-
-
 
 		return groups;
 	}
 
 	private cullSequences() {
-		this._inputSequence = cullSequence(this._inputSequence, this.maxInputSequenceLength);
-		this._releaseSequence = cullSequence(this._releaseSequence, this.maxReleaseSequenceLength);
+		this._inputSequence = cullSequence(
+			this._inputSequence,
+			this.maxInputSequenceLength,
+		);
+		this._releaseSequence = cullSequence(
+			this._releaseSequence,
+			this.maxReleaseSequenceLength,
+		);
 	}
 }

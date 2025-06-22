@@ -11,7 +11,7 @@ export interface Key {
 
 export interface KeyboardLayerEvent {
 	key: Key;
-	modifiers: Modifiers
+	modifiers: Modifiers;
 }
 
 export type KeyboardCallbackFn = (ev: KeyboardLayerEvent) => void;
@@ -88,8 +88,8 @@ export class KeyboardLayer {
 				alt: ev.altKey,
 				ctrl: ev.ctrlKey,
 				meta: ev.metaKey,
-			}
-		}
+			},
+		};
 		const filtered = this.callbacks.filter((c) => c.type === type);
 		filtered.forEach((cb) => cb.fn(event));
 	}

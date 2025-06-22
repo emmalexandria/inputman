@@ -10,15 +10,12 @@ interface MouseState {
 	lastMove: Vector2;
 }
 
-export type MouseCallbackFn = (
-	ev: MouseLayerEvent,
-	state: MouseState,
-) => void;
+export type MouseCallbackFn = (ev: MouseLayerEvent, state: MouseState) => void;
 
 export interface MouseLayerEvent {
 	ev: MouseEvent | Event;
 	button?: string;
-	modifiers?: Modifiers
+	modifiers?: Modifiers;
 }
 
 export type MouseCallbackType =
@@ -69,7 +66,7 @@ export class MouseLayer {
 	}
 
 	get cursorLocked() {
-		return this._cursorLocked
+		return this._cursorLocked;
 	}
 
 	registerCallback(cb: MouseCallbackFn, type: MouseCallbackType) {
@@ -77,14 +74,14 @@ export class MouseLayer {
 	}
 
 	removeCallback(cb: MouseCallback) {
-		const idx = this.callbacks.filter((c) => c !== cb)
+		const idx = this.callbacks.filter((c) => c !== cb);
 	}
 
 	private invokeCallbacks(ev: MouseEvent | Event, type: MouseCallbackType) {
 		// We have two event types here, scroll (Event) and mouse button moves/clicks (MouseEvent)
 		// So we start by just filling out the event
-		let event: MouseLayerEvent = {
-			ev
+		const event: MouseLayerEvent = {
+			ev,
 		};
 		// And if its a MouseEvent we fill in all the additional details we have from that
 		if (ev instanceof MouseEvent) {
@@ -92,11 +89,11 @@ export class MouseLayer {
 				shift: ev.shiftKey,
 				alt: ev.altKey,
 				ctrl: ev.ctrlKey,
-				meta: ev.metaKey
-			}
+				meta: ev.metaKey,
+			};
 			// Before we set the button, we check its a mouse button event and not a mouse move event
 			if (type === "mousedown" || type === "mouseup") {
-				event.button = getMouseButtonName(ev.button)
+				event.button = getMouseButtonName(ev.button);
 			}
 		}
 		// Then we filter the callbacks for those which match the type of event we have

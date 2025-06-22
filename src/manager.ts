@@ -11,7 +11,6 @@ export interface InputManConfig {
 	sequenceTimer?: number;
 }
 
-
 export interface Input {
 	input: string;
 	press: boolean;
