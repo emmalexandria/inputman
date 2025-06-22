@@ -9,6 +9,10 @@ const SEPERATOR_SEQUENTIAL = ">";
 
 type BSeperator = "simultaneous" | "sequential";
 
+/** Internally, inputman represents bindings as a 2D array of strings in which each inner array represents a group of 
+ * simultaneous inputs. Multiple arrays then represent sets of simultaneous inputs connected sequentially*/
+export type BindingDescriptor = string[][];
+
 export type BindingFn = () => void;
 
 export class Binding {
@@ -37,9 +41,9 @@ export class Binding {
 
 export function parseBinding(
 	binding: string,
-): string[][] {
+): BindingDescriptor {
 	const split = splitBinding(binding);
-	const groups: string[][] = []
+	const groups: BindingDescriptor = []
 
 	let curr_group: string[] = [];
 	let idx = 0;
@@ -62,6 +66,18 @@ export function parseBinding(
 	}
 
 	return groups
+}
+
+export function parseInputSequence(input: Input[]): BindingDescriptor {
+	const ret: string[][] = [];
+
+	return ret;
+}
+
+/** Internal function to check if one binding descriptor (converted from a series of inputs) contains another binding descriptor.
+ * Used internally in bindings to check if they match the current input state */
+export function inputContainsOrdered(outer: BindingDescriptor, inner: BindingDescriptor): boolean {
+	return true;
 }
 
 export function splitBinding(binding: string): string[] {
