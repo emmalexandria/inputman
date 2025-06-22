@@ -12,18 +12,22 @@ export type KeyboardCallbackFn = (ev: KeyboardEvent) => void;
 export type KeyboardCallbackType = "keydown" | "keyup";
 
 interface KeyboardCallback {
-	type: KeyboardCallbackType,
-	fn: KeyboardCallbackFn
+	type: KeyboardCallbackType;
+	fn: KeyboardCallbackFn;
 }
 
 export class KeyboardLayer {
 	private manager: InputMan;
-	private callbacks: Array<KeyboardCallback> = new Array();
+	private callbacks: Array<KeyboardCallback> = [];
 	private pressedKeys: Set<Key> = new Set();
-	private keySequence: Array<Key> = new Array();
+	private keySequence: Array<Key> = [];
 	private maxSequenceLength: number;
 
-	constructor(manager: InputMan, target: HTMLElement | Window, maxSequenceLength = 5) {
+	constructor(
+		manager: InputMan,
+		target: HTMLElement | Window,
+		maxSequenceLength = 5,
+	) {
 		this.manager = manager;
 		this.maxSequenceLength = maxSequenceLength;
 
@@ -46,12 +50,16 @@ export class KeyboardLayer {
 
 	/** Check if a key is pressed by key only */
 	isPressedKey(key: string): boolean {
-		return Array.from(this.pressedKeys).find((k) => k.key === key) ? true : false;
+		return Array.from(this.pressedKeys).find((k) => k.key === key)
+			? true
+			: false;
 	}
 
 	/** Check if a key is pressed by code only */
 	isPressedCode(code: string): boolean {
-		return Array.from(this.pressedKeys).find((k) => k.code === code) ? true : false;
+		return Array.from(this.pressedKeys).find((k) => k.code === code)
+			? true
+			: false;
 	}
 
 	/** Pressed keys track the currently held keys (added on keydown, removed on keyup) */
@@ -59,9 +67,9 @@ export class KeyboardLayer {
 		return this.pressedKeys;
 	}
 
-	/** The key sequence is the list of keys pressed in order, intended for sequential bindings instead of 
-	* combinatorial bindings. Keys are added on keyup, removed when the length of the recorded seqeunce
-	* exceeds the maximum length */
+	/** The key sequence is the list of keys pressed in order, intended for sequential bindings instead of
+	 * combinatorial bindings. Keys are added on keyup, removed when the length of the recorded seqeunce
+	 * exceeds the maximum length */
 	getKeySequence(): Array<Key> {
 		return this.keySequence;
 	}
@@ -71,10 +79,13 @@ export class KeyboardLayer {
 		filtered.forEach((cb) => cb.fn(ev));
 	}
 
-	registerCallback(cb: KeyboardCallbackFn, type: KeyboardCallbackType = "keydown") {
+	registerCallback(
+		cb: KeyboardCallbackFn,
+		type: KeyboardCallbackType = "keydown",
+	) {
 		this.callbacks.push({
 			fn: cb,
-			type
+			type,
 		});
 	}
 
@@ -100,7 +111,10 @@ export class KeyboardLayer {
 
 	private cullKeySequence() {
 		if (this.keySequence.length > this.maxSequenceLength) {
-			this.keySequence = this.keySequence.slice(this.keySequence.length - this.maxSequenceLength, this.keySequence.length)
+			this.keySequence = this.keySequence.slice(
+				this.keySequence.length - this.maxSequenceLength,
+				this.keySequence.length,
+			);
 		}
 	}
 }

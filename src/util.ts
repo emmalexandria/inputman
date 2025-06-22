@@ -11,21 +11,22 @@ export function arrayContainsOrd<T>(outer: T[], inner: T[]): boolean {
 		}
 	}
 
-	return false
+	return false;
 }
 
 export function arraysEqual<T>(array1: T[], array2: T[]): boolean {
-	return array1.length === array2.length && array1.every((e) => {
-		return array2.includes(e)
-	})
+	return (
+		array1.length === array2.length &&
+		array1.every((e) => {
+			return array2.includes(e);
+		})
+	);
 }
 
 // Nasty little hack required because addEventListener on window doesn't infer the correct event type
 export function addWindowEventListener<K extends keyof WindowEventMap>(
 	type: K,
-	listener: (this: Window, ev: WindowEventMap[K]) => any
+	listener: (this: Window, ev: WindowEventMap[K]) => void,
 ) {
 	window.addEventListener(type, listener);
 }
-
-

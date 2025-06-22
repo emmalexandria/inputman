@@ -13,16 +13,8 @@
 		"noImplicitOverride": true,
 		"module": "preserve",
 		"noEmit": true,
-		"lib": [
-			"es2022",
-			"dom",
-			"dom.iterable"
-		]
+		"lib": ["es2022", "dom", "dom.iterable"]
 	},
-	"include": [
-		"**/*.ts",
-	],
-	"exclude": [
-		"node_modules"
-	]
+	"include": ["**/*.ts"],
+	"exclude": ["node_modules"]
 }

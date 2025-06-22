@@ -5,36 +5,28 @@ export default defineConfig({
 		projects: [
 			{
 				test: {
-					include: [
-						'tests/**/*.test.ts',
-					],
-					exclude: [
-						'tests/**/*.browser.test.ts'
-					],
-					name: 'code',
-					environment: 'happy-dom'
-				}
+					include: ["tests/**/*.test.ts"],
+					exclude: ["tests/**/*.browser.test.ts"],
+					name: "code",
+					environment: "happy-dom",
+				},
 			},
 			{
 				test: {
-					include: [
-						'tests/**/*.browser.test.ts'
-					],
+					include: ["tests/**/*.browser.test.ts"],
 					browser: {
 						headless: true,
-						provider: 'playwright',
+						provider: "playwright",
 						enabled: true,
 						instances: [
-							{ browser: 'chromium' },
-							{ browser: 'firefox' },
-							{ browser: 'webkit' }
-						]
+							{ browser: "chromium" },
+							{ browser: "firefox" },
+							{ browser: "webkit" },
+						],
 					},
-					name: 'browser'
-				}
-
-			}
-		]
-
-	}
-})
+					name: "browser",
+				},
+			},
+		],
+	},
+});

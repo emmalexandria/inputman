@@ -5,7 +5,10 @@
 	"type": "module",
 	"scripts": {
 		"build": "tsup",
-		"test": "vitest"
+		"test": "vitest",
+		"lint": "eslint",
+		"lint:fix": "eslint --fix",
+		"format": "prettier --write '**/*.+(js|ts|json)'"
 	},
 	"files": [
 		"./dist"
@@ -32,14 +35,19 @@
 		"url": "https://github.com/emmalexandria/inputman"
 	},
 	"packageManager": "pnpm@10.11.1",
-	"dependencies": {
+	"devDependencies": {
+		"@eslint/js": "^9.29.0",
+		"@typescript-eslint/eslint-plugin": "^8.34.1",
+		"@typescript-eslint/parser": "^8.34.1",
+		"@vitest/browser": "^3.2.3",
+		"eslint": "^9.29.0",
+		"globals": "^16.2.0",
+		"happy-dom": "^18.0.1",
+		"playwright": "^1.53.0",
+		"prettier": "^3.5.3",
 		"tsup": "^8.5.0",
 		"typescript": "^5.8.3",
+		"typescript-eslint": "^8.34.1",
 		"vitest": "^3.2.3"
-	},
-	"devDependencies": {
-		"@vitest/browser": "^3.2.3",
-		"happy-dom": "^18.0.1",
-		"playwright": "^1.53.0"
 	}
 }

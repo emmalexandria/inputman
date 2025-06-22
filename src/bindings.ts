@@ -3,34 +3,38 @@ import { arrayContainsOrd } from "./util";
 
 export type BindingFn = () => void;
 
-export interface IBinding {
-	fn: BindingFn,
-	matches: (input: string[]) => boolean
-}
-
-export class Binding implements IBinding {
+export class Binding {
 	fn: BindingFn;
 	value?: number;
 	sequential: boolean = false;
 	keys: string[];
 	name?: string;
 
-	constructor(keys: string[], fn: BindingFn, name?: string) {
+	constructor(
+		keys: string[],
+		fn: BindingFn,
+		sequential: boolean = false,
+		name?: string,
+	) {
 		this.keys = keys;
 		this.fn = fn;
-		this.name = name
+		this.name = name;
+		this.sequential = sequential;
 	}
 
 	matches(input: string[]) {
-		return arrayContainsOrd(input, this.keys)
+		return arrayContainsOrd(input, this.keys);
 	}
 }
 
-export function parseBindingString(binding: string, physical: boolean = true): Key[] {
-	const inputs: Key[] = []
+export function parseBindingString(
+	binding: string,
+	physical: boolean = true,
+): Key[] {
+	const inputs: Key[] = [];
 	let split: string[];
 	if (physical) {
-		split = binding.split("+").filter((s) => s.length > 0)
+		split = binding.split("+").filter((s) => s.length > 0);
 	} else {
 		// Split the binding string and filter out any empty sections
 		split = splitBindingStringEscaped(binding).filter((s) => s.length > 0);
@@ -38,57 +42,57 @@ export function parseBindingString(binding: string, physical: boolean = true): K
 
 	split.forEach((s) => {
 		if (physical) {
-			inputs.push({ code: s })
+			inputs.push({ code: s });
 		} else {
-			inputs.push({ key: s })
+			inputs.push({ key: s });
 		}
-	})
+	});
 
-	return inputs
+	return inputs;
 }
 
-/** Internal function to split a binding string by +s with escaping for multiple plusses. 
+/** Internal function to split a binding string by +s with escaping for multiple plusses.
  * This function is only used for non physical key names (e.g. D vs KeyD), because with physical key names
  * + is a ShiftLeft/ShiftRight and an Equal*/
 export function splitBindingStringEscaped(binding: string): string[] {
-	let split = []
-	let word = ""
+	const split = [];
+	let word = "";
 	for (let i = 0; i < binding.length; i++) {
-		let c = binding[i];
+		const c = binding[i];
 		if (c === "+") {
 			if (word.length > 0) {
-				split.push(word)
-				word = ""
+				split.push(word);
+				word = "";
 			}
 			// If the next character exists and is also a +, then add one to the split array (escaped)
 			if (binding[i + 1] === "+") {
-				split.push('+')
+				split.push("+");
 				//Increment i again because we have already handled the next char
-				i++
+				i++;
 			}
-			continue
+			continue;
 		}
-		word += c
+		word += c;
 	}
 
 	if (word.length > 0) {
-		split.push(word)
+		split.push(word);
 	}
 
 	return split;
 }
 
-export function createBinding(binding: string, fn: BindingFn, name?: string): Binding | undefined {
-	let keys = splitBindingStringEscaped(binding);
-	return new Binding(keys, fn, name);
+export function createBinding(
+	binding: string | string[],
+	fn: BindingFn,
+	name?: string,
+): Binding | undefined {
+	if (typeof binding === "string") {
+		const keys = splitBindingStringEscaped(binding);
+		return new Binding(keys, fn, false, name);
+	}
+
+	if (typeof binding === "object") {
+		return new Binding(binding, fn, true, name);
+	}
 }
-
-
-
-
-
-
-
-
-
-

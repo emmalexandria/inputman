@@ -1,36 +1,45 @@
 import type { InputMan } from "../manager";
-import { v2Zero, type Vector2 } from "../types"
-import { addWindowEventListener } from "../util"
+import { v2Zero, type Vector2 } from "../types";
+import { addWindowEventListener } from "../util";
 
 interface MouseState {
-	position: Vector2,
-	pagePosition: Vector2,
-	screenPosition: Vector2
-	lastMove: Vector2
+	position: Vector2;
+	pagePosition: Vector2;
+	screenPosition: Vector2;
+	lastMove: Vector2;
 }
 
-export type MouseCallbackFn = (ev: MouseEvent | Event, state: MouseState) => void;
-export type MouseCallbackType = "mousedown" | "mouseup" | "mousemove" | "scroll";
+export type MouseCallbackFn = (
+	ev: MouseEvent | Event,
+	state: MouseState,
+) => void;
+export type MouseCallbackType =
+	| "mousedown"
+	| "mouseup"
+	| "mousemove"
+	| "scroll";
 
 interface MouseCallback {
-	type: MouseCallbackType,
-	fn: MouseCallbackFn
+	type: MouseCallbackType;
+	fn: MouseCallbackFn;
 }
 
 export class MouseLayer {
 	state: MouseState;
 	manager: InputMan;
-	private callbacks: Array<MouseCallback> = new Array();
-
+	private callbacks: Array<MouseCallback> = [];
+	private target: Window | HTMLElement;
 
 	constructor(manager: InputMan, target: Window | HTMLElement) {
 		this.manager = manager;
+		this.target = target;
+
 		this.state = {
 			position: v2Zero(),
 			pagePosition: v2Zero(),
 			screenPosition: v2Zero(),
-			lastMove: v2Zero()
-		}
+			lastMove: v2Zero(),
+		};
 
 		this.mouseDown = this.mouseDown.bind(this);
 		this.mouseUp = this.mouseUp.bind(this);
@@ -51,7 +60,7 @@ export class MouseLayer {
 	}
 
 	registerCallback(cb: MouseCallbackFn, type: MouseCallbackType) {
-		this.callbacks.push({ fn: cb, type })
+		this.callbacks.push({ fn: cb, type });
 	}
 
 	private invokeCallbacks(ev: MouseEvent | Event, type: MouseCallbackType) {
@@ -59,44 +68,56 @@ export class MouseLayer {
 		filtered.forEach((cb) => cb.fn(ev, this.state));
 	}
 
-	mouseDown(ev: MouseEvent) {
+	private mouseDown(ev: MouseEvent) {
 		this.invokeCallbacks(ev, "mousedown");
 		this.manager.pressInput(getMouseButtonName(ev.button));
 	}
 
-	mouseUp(ev: MouseEvent) {
+	private mouseUp(ev: MouseEvent) {
 		this.invokeCallbacks(ev, "mouseup");
 		this.manager.releaseInput(getMouseButtonName(ev.button));
 	}
 
-	mouseMove(ev: MouseEvent) {
+	private mouseMove(ev: MouseEvent) {
 		this.state = {
 			lastMove: { x: ev.movementX, y: ev.movementY },
 			position: { x: ev.clientX, y: ev.clientY },
 			screenPosition: { x: ev.screenX, y: ev.screenY },
-			pagePosition: { x: ev.pageX, y: ev.pageY }
-		}
-		this.invokeCallbacks(ev, "mousemove")
+			pagePosition: { x: ev.pageX, y: ev.pageY },
+		};
+		this.invokeCallbacks(ev, "mousemove");
 	}
 
 	mouseScroll(ev: Event) {
 		this.invokeCallbacks(ev, "scroll");
 	}
+
+	lockCursor() {
+		if (this.target instanceof Window) {
+			window.document.documentElement.requestPointerLock();
+		} else {
+			this.target.requestPointerLock();
+		}
+	}
+
+	unlockCursor() {
+		window.document.exitPointerLock();
+	}
 }
 
 export function getMouseButtonName(button: number): string {
 	switch (button) {
-		case 0: return "Mouse1"
-		case 1: return "Mouse3"
-		case 2: return "Mouse2"
-		case 3: return "Mouse4"
-		case 4: return "Mouse5"
+		case 0:
+			return "Mouse1";
+		case 1:
+			return "Mouse3";
+		case 2:
+			return "Mouse2";
+		case 3:
+			return "Mouse4";
+		case 4:
+			return "Mouse5";
 	}
 
-	return "MouseInvalid"
+	return "MouseInvalid";
 }
-
-
-
-
-

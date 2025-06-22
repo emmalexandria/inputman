@@ -1,3 +1,3 @@
 import { InputMan } from "./manager";
 
-export { InputMan }
+export { InputMan };
