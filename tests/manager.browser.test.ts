@@ -65,7 +65,7 @@ test("Test basic sequential binding", async () => {
 
 	let pressed = false;
 
-	inputMan.registerBinding(["ShiftLeft", "KeyE", "KeyD"], () => {
+	inputMan.registerBinding("ShiftLeft > KeyE > KeyD", () => {
 		pressed = true;
 	});
 

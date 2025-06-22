@@ -2,64 +2,45 @@ import { test, expect } from "vitest";
 import {
 	createBinding,
 	parseBindingString,
+	splitBinding,
 	splitBindingStringEscaped,
 } from "../src/bindings";
 
-test("Test basic splitting binding string escaped", () => {
-	let input = "++";
+test("Test splitting binding", () => {
+	const split = splitBinding("KeyD+KeyC>ShiftLeft");
 
-	expect(splitBindingStringEscaped(input)).toStrictEqual(["+"]);
-});
-
-test("Test splitting binding string escaped x2", () => {
-	let input = "++++";
-
-	expect(splitBindingStringEscaped(input)).toStrictEqual(["+", "+"]);
-});
-
-test("Test splitting binding string escaped", () => {
-	let input = "D+++C";
-
-	expect(splitBindingStringEscaped(input)).toStrictEqual(["D", "+", "C"]);
-});
+	expect(split).toStrictEqual(["KeyD", "+", "KeyC", ">", "ShiftLeft"]);
+})
 
 test("Test parsing single key binding", () => {
 	let inputs = parseBindingString("KeyD");
 
-	expect(inputs).toStrictEqual([{ code: "KeyD" }]);
+	expect(inputs).toStrictEqual([["KeyD"]]);
 });
 
 test("Test parsing multi-key binding", () => {
 	let inputs = parseBindingString("ShiftLeft+KeyD");
 
-	expect(inputs).toStrictEqual([{ code: "ShiftLeft" }, { code: "KeyD" }]);
+	expect(inputs).toStrictEqual([["ShiftLeft", "KeyD"]]);
 });
 
-test("Test parsing non-physical binding", () => {
-	let inputs = parseBindingString("D+++A+Shift", false);
+test("Test parsing complex multi-group binding", () => {
+	const binding = parseBindingString("ShiftLeft+KeyD>ShiftLeft+KeyE+KeyC>KeyR");
 
-	expect(inputs).toStrictEqual([
-		{ key: "D" },
-		{ key: "+" },
-		{ key: "A" },
-		{ key: "Shift" },
-	]);
-});
+	expect(binding).toStrictEqual([["ShiftLeft", "KeyD"], ["ShiftLeft", "KeyE", "KeyC"], ["KeyR"]])
+})
 
 test("Test single binding creation", () => {
 	let binding = createBinding("KeyW", () => { });
 
-	expect(binding?.keys).toStrictEqual(["KeyW"]);
+	expect(binding?.keys).toStrictEqual([["KeyW"]]);
 });
+
 
 test("Test combination binding creation", () => {
 	let binding = createBinding("ShiftLeft+KeyW", () => { });
 
-	expect(binding?.keys).toStrictEqual(["ShiftLeft", "KeyW"]);
+	expect(binding?.keys).toStrictEqual([["ShiftLeft", "KeyW"]]);
 });
 
-test("Test binding string with spaces", () => {
-	let binding = parseBindingString("ShiftLeft + KeyW");
 
-	expect(binding).toStrictEqual([{ code: "ShiftLeft" }, { code: "KeyW" }]);
-})

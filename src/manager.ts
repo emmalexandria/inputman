@@ -33,7 +33,7 @@ export class InputMan {
 		this.mouse = new MouseLayer(this, target);
 	}
 
-	registerBinding(binding: string | string[], fn: BindingFn): boolean {
+	registerBinding(binding: string, fn: BindingFn): boolean {
 		const bindingObj = createBinding(binding, fn);
 		if (bindingObj) {
 			this.bindings.add(bindingObj);
