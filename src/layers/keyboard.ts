@@ -112,7 +112,7 @@ export class KeyboardLayer {
 		this.manager.maybePreventDefault(ev);
 		this.pressedKeys.add({ key: ev.key, code: ev.code });
 		this.invokeCallbacks(ev, "keydown");
-		this.manager.pressInput(ev.code);
+		this.manager.pressInput({ input: ev.code, press: true });
 	}
 
 	private keyUp(ev: KeyboardEvent) {
@@ -121,7 +121,7 @@ export class KeyboardLayer {
 		this.keySequence.push({ key: ev.key, code: ev.code });
 		this.invokeCallbacks(ev, "keyup");
 		this.cullKeySequence();
-		this.manager.releaseInput(ev.code);
+		this.manager.releaseInput({ input: ev.code, press: false });
 	}
 
 	private cullKeySequence() {

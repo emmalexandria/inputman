@@ -11,11 +11,17 @@ export interface InputManConfig {
 	sequenceTimer?: number;
 }
 
-type Input = string;
+
+export interface Input {
+	input: string;
+	press: boolean;
+}
 
 export class InputMan {
 	keyboard: KeyboardLayer;
 	mouse: MouseLayer;
+
+	private inputs: Array<Input> = [];
 
 	private preventsDefault: boolean;
 	private pressedInputs: Set<Input> = new Set();
