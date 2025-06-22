@@ -76,6 +76,10 @@ export class MouseLayer {
 		this.callbacks.push({ fn: cb, type });
 	}
 
+	removeCallback(cb: MouseCallback) {
+		const idx = this.callbacks.filter((c) => c !== cb)
+	}
+
 	private invokeCallbacks(ev: MouseEvent | Event, type: MouseCallbackType) {
 		// We have two event types here, scroll (Event) and mouse button moves/clicks (MouseEvent)
 		// So we start by just filling out the event
