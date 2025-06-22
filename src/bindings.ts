@@ -1,6 +1,15 @@
 import type { Key } from "./layers/keyboard";
 import { arrayContainsOrd } from "./util";
 
+const SEPERATOR_CHAR = "+";
+const SEPERATOR_SEQUENTIAL = ">";
+const GROUPING_LEFT = "(";
+const GROUPING_RIGHT = ")";
+
+type BSection = string[];
+type BSeperator = "simultaneous" | "sequential";
+
+
 export type BindingFn = () => void;
 
 export class Binding {
