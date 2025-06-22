@@ -35,6 +35,7 @@ interface MouseCallback {
 export class MouseLayer {
 	state: MouseState;
 	manager: InputMan;
+	private _cursorLocked: boolean = false;
 	private callbacks: Array<MouseCallback> = [];
 	private target: Window | HTMLElement;
 
@@ -65,6 +66,10 @@ export class MouseLayer {
 			target.addEventListener("mousemove", this.mouseMove);
 			target.addEventListener("scroll", this.mouseScroll);
 		}
+	}
+
+	get cursorLocked() {
+		return this._cursorLocked
 	}
 
 	registerCallback(cb: MouseCallbackFn, type: MouseCallbackType) {
@@ -127,10 +132,12 @@ export class MouseLayer {
 		} else {
 			this.target.requestPointerLock();
 		}
+		this._cursorLocked = true;
 	}
 
 	unlockCursor() {
 		window.document.exitPointerLock();
+		this._cursorLocked = false;
 	}
 }
 

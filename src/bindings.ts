@@ -27,6 +27,10 @@ export class Binding {
 	}
 }
 
+function cleanBindingCode(b: string): string {
+	return b.trim();
+}
+
 export function parseBindingString(
 	binding: string,
 	physical: boolean = true,
@@ -41,10 +45,11 @@ export function parseBindingString(
 	}
 
 	split.forEach((s) => {
+		const cleaned = cleanBindingCode(s)
 		if (physical) {
-			inputs.push({ code: s });
+			inputs.push({ code: cleaned });
 		} else {
-			inputs.push({ key: s });
+			inputs.push({ key: cleaned });
 		}
 	});
 

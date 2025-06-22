@@ -47,13 +47,19 @@ test("Test parsing non-physical binding", () => {
 });
 
 test("Test single binding creation", () => {
-	let binding = createBinding("KeyW", () => {});
+	let binding = createBinding("KeyW", () => { });
 
 	expect(binding?.keys).toStrictEqual(["KeyW"]);
 });
 
 test("Test combination binding creation", () => {
-	let binding = createBinding("ShiftLeft+KeyW", () => {});
+	let binding = createBinding("ShiftLeft+KeyW", () => { });
 
 	expect(binding?.keys).toStrictEqual(["ShiftLeft", "KeyW"]);
 });
+
+test("Test binding string with spaces", () => {
+	let binding = parseBindingString("ShiftLeft + KeyW");
+
+	expect(binding).toStrictEqual([{ code: "ShiftLeft" }, { code: "KeyW" }]);
+})
