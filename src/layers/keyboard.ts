@@ -8,7 +8,16 @@ export interface Key {
 	code?: string;
 }
 
-export type KeyboardCallbackFn = (ev: KeyboardEvent) => void;
+export interface KeyEvent {
+	key?: Key;
+	code?: string;
+	shift: boolean;
+	ctrl: boolean;
+	alt: boolean;
+	meta: boolean;
+}
+
+export type KeyboardCallbackFn = (ev: KeyEvent) => void;
 export type KeyboardCallbackType = "keydown" | "keyup";
 
 interface KeyboardCallback {
@@ -75,8 +84,15 @@ export class KeyboardLayer {
 	}
 
 	private invokeCallbacks(ev: KeyboardEvent, type: KeyboardCallbackType) {
+		const event: KeyEvent = {
+			key: { code: ev.code, key: ev.key },
+			shift: ev.shiftKey,
+			alt: ev.altKey,
+			ctrl: ev.ctrlKey,
+			meta: ev.metaKey,
+		}
 		const filtered = this.callbacks.filter((c) => c.type === type);
-		filtered.forEach((cb) => cb.fn(ev));
+		filtered.forEach((cb) => cb.fn(event));
 	}
 
 	registerCallback(
