@@ -1,5 +1,5 @@
 import { test, expect } from "vitest";
-import { arrayContainsOrd } from "../src/util";
+import { arrayContainsOrd, cullSequence } from "../src/util";
 
 test("Test array contains ordered", () => {
 	expect(arrayContainsOrd([1, 2, 3, 4, 5], [1, 2, 3])).toStrictEqual(true);
@@ -10,3 +10,9 @@ test("Test array contains ordered", () => {
 		false,
 	);
 });
+
+test("Test sequence culling", () => {
+	const input = ["a", "b", "c", "d", "e"];
+
+	expect(cullSequence(input, 3)).toStrictEqual(["c", "d", "e"])
+})

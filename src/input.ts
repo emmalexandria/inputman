@@ -1,4 +1,5 @@
 import type { BindingDescriptor } from "./bindings";
+import { cullSequence } from "./util";
 
 export interface Modifiers {
 	shift: boolean;
@@ -17,11 +18,11 @@ export interface Input<T> {
 /** Describes the configuration for the input class */
 export interface InputConfig {
 	/** How long inputs remain in the release and input sequence */
-	releaseSequenceTimer: number,
+	releaseSequenceTimer?: number,
 	/** The maximum number of inputs in the release sequence */
-	maxReleaseSequenceLength: number,
+	maxReleaseSequenceLength?: number,
 	/** The maximum length of the full sequence of both pressed keys and releases */
-	maxInputSequenceLength: number,
+	maxInputSequenceLength?: number,
 }
 
 /** This class is used internally by both the input manager and the input layers to keep track of the sequence of inputs, 
@@ -32,8 +33,14 @@ export class Inputs<T> {
 	private _pressedInputs: Set<T> = new Set();
 	private _releaseSequence: Array<T> = new Array();
 
-	constructor() {
+	private releaseTimer: number;
+	private maxReleaseSequenceLength: number;
+	private maxInputSequenceLength: number;
 
+	constructor(config?: InputConfig) {
+		this.releaseTimer = config?.releaseSequenceTimer ?? 500;
+		this.maxReleaseSequenceLength = config?.maxReleaseSequenceLength ?? 5;
+		this.maxInputSequenceLength = config?.maxInputSequenceLength ?? 10;
 	}
 
 	get inputSequence() {
@@ -48,7 +55,60 @@ export class Inputs<T> {
 		return this._releaseSequence;
 	}
 
+	isPressed(input: T) {
+		return this.pressedInputs.has(input);
+	}
+
+	press(input: T) {
+		this._pressedInputs.add(input);
+		this._inputSequence.push({ input, press: true });
+
+		this.cullSequences();
+	}
+
+	unpress(input: T) {
+		this._pressedInputs.delete(input);
+		this._inputSequence.push({ input, press: false });
+
+		this._releaseSequence.push(input);
+		setTimeout(() => {
+			const idx = this._releaseSequence.findIndex((i) => i === input);
+			this._releaseSequence.slice(idx);
+		}, this.releaseTimer)
+
+
+		this.cullSequences();
+	}
+
+	consume(input: Input<T>[]) {
+		for (let i of input) {
+			const idx = this._inputSequence.findIndex((item) => item === i);
+			if (idx) {
+				this._inputSequence.splice(idx, 1);
+			}
+		}
+	}
+
 	toBindingDescriptor(): BindingDescriptor {
-		return []
+		const groups: BindingDescriptor = [];
+		const group: T[] = [];
+		const pressed: T[] = [];
+
+		for (let i of this._inputSequence) {
+			if (i.press) {
+				pressed.push(i.input);
+			} else {
+
+			}
+		}
+
+
+
+		return groups;
+	}
+
+	private cullSequences() {
+		this._inputSequence = cullSequence(this._inputSequence, this.maxInputSequenceLength);
+		this._releaseSequence = cullSequence(this._releaseSequence, this.maxReleaseSequenceLength);
 	}
 }

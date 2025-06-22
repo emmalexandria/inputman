@@ -30,3 +30,13 @@ export function addWindowEventListener<K extends keyof WindowEventMap>(
 ) {
 	window.addEventListener(type, listener);
 }
+
+export function cullSequence<T>(input: T[], maxLength: number): T[] {
+	if (input.length > maxLength) {
+		const len = input.length;
+		const start = len - maxLength;
+		input = input.slice(start, len);
+	}
+
+	return input;
+}
