@@ -18,20 +18,14 @@ export type BindingFn = () => void;
 export class Binding {
 	fn: BindingFn;
 	value?: number;
-	sequential: boolean = false;
 	keys: string[][];
-	name?: string;
 
 	constructor(
 		keys: string[][],
 		fn: BindingFn,
-		sequential: boolean = false,
-		name?: string,
 	) {
 		this.keys = keys;
 		this.fn = fn;
-		this.name = name;
-		this.sequential = sequential;
 	}
 
 	matches(input: Input[]) {

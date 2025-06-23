@@ -48,26 +48,8 @@ export class InputMan {
 	}
 
 	private invokeBindings() {
-		const { sequential, consecutive } = Array.from(this.bindings).reduce(
-			(accumulator, curr) => {
-				if (curr.sequential) {
-					accumulator.sequential.push(curr);
-				} else {
-					accumulator.consecutive.push(curr);
-				}
-				return accumulator;
-			},
-			{ sequential: new Array<Binding>(), consecutive: new Array<Binding>() },
-		);
-
-		for (const binding of consecutive) {
+		for (const binding of this.bindings) {
 			if (binding.matches(Array.from(this.pressedInputs))) {
-				binding.fn();
-			}
-		}
-
-		for (const binding of sequential) {
-			if (binding.matches(this.inputSequence)) {
 				binding.fn();
 			}
 		}

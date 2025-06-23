@@ -1,4 +1,4 @@
-import type { Modifiers } from "../input";
+import type { Input, Modifiers } from "../input";
 import type { InputMan } from "../manager";
 import { addWindowEventListener } from "../util";
 
@@ -7,6 +7,22 @@ export interface Key {
 	key?: string;
 	/// The physical location of the key (based on U.S. QWERTY layout)
 	code?: string;
+}
+
+export class KeyInput implements Input<Key> {
+	input: Key;
+	press?: boolean
+	name: string;
+
+	constructor(key: Key, press?: boolean, name?: string) {
+		this.input = key;
+		this.press = press;
+		if (name) {
+			this.name = name;
+		} else {
+			this.name = key.code ?? key.key ?? "unknown";
+		}
+	}
 }
 
 export interface KeyboardLayerEvent {

@@ -12,7 +12,8 @@ export interface Input<T> {
 	/** The input triggered */
 	input: T;
 	/** Whether it was a press or release */
-	press: boolean;
+	press?: boolean;
+	name: string;
 }
 
 /** Describes the configuration for the input class */
@@ -59,18 +60,20 @@ export class Inputs<T> {
 		return this.pressedInputs.has(input);
 	}
 
-	press(input: T) {
-		this._pressedInputs.add(input);
-		this._inputSequence.push({ input, press: true });
+	press(input: Input<T>) {
+		input.press = true;
+		this._pressedInputs.add(input.input);
+		this._inputSequence.push(input);
 
 		this.cullSequences();
 	}
 
-	unpress(input: T) {
-		this._pressedInputs.delete(input);
-		this._inputSequence.push({ input, press: false });
+	unpress(input: Input<T>) {
+		input.press = false;
+		this._pressedInputs.delete(input.input);
+		this._inputSequence.push(input);
 
-		this._releaseSequence.push(input);
+		this._releaseSequence.push(input.input);
 		setTimeout(() => {
 			const idx = this._releaseSequence.findIndex((i) => i === input);
 			this._releaseSequence.slice(idx);
@@ -88,19 +91,28 @@ export class Inputs<T> {
 		}
 	}
 
-	toBindingDescriptor(): BindingDescriptor {
-		const groups: BindingDescriptor = [];
-		const group: T[] = [];
-		const pressed: T[] = [];
+	toBindingDescriptor(num: number = -1): BindingDescriptor {
+		const result: BindingDescriptor = [];
+		const held: Set<string> = new Set();
+		let lastGroup: string[] | null = null
 
-		for (const i of this._inputSequence) {
-			if (i.press) {
-				pressed.push(i.input);
+		let inputSequence = this._inputSequence;
+		if (num > 0) {
+			inputSequence = this._inputSequence.slice(this._inputSequence.length - num);
+		}
+
+		for (const input of inputSequence) {
+			if (input.press) {
+				held.add(input.name);
+
+				result.push([...held])
+
 			} else {
+				held.delete(input.name);
 			}
 		}
 
-		return groups;
+		return result;
 	}
 
 	private cullSequences() {
