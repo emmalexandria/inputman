@@ -1,4 +1,4 @@
-import type { Modifiers } from "../input";
+import { Inputs, type Input, type Modifiers } from "../input";
 import type { InputMan } from "../manager";
 import { addWindowEventListener } from "../util";
 
@@ -9,9 +9,25 @@ export interface Key {
 	code?: string;
 }
 
+export class KeyInput implements Input<Key> {
+	input: Key;
+	press?: boolean
+	name: string;
+
+	constructor(key: Key, press?: boolean, name?: string) {
+		this.input = key;
+		this.press = press;
+		if (name) {
+			this.name = name;
+		} else {
+			this.name = key.code ?? key.key ?? "unknown";
+		}
+	}
+}
+
 export interface KeyboardLayerEvent {
 	key: Key;
-	modifiers: Modifiers
+	modifiers: Modifiers;
 }
 
 export type KeyboardCallbackFn = (ev: KeyboardLayerEvent) => void;
@@ -25,9 +41,7 @@ interface KeyboardCallback {
 export class KeyboardLayer {
 	private manager: InputMan;
 	private callbacks: Array<KeyboardCallback> = [];
-	private pressedKeys: Set<Key> = new Set();
-	private keySequence: Array<Key> = [];
-	private maxSequenceLength: number;
+	private inputs: Inputs<Key>;
 
 	constructor(
 		manager: InputMan,
@@ -35,7 +49,8 @@ export class KeyboardLayer {
 		maxSequenceLength = 5,
 	) {
 		this.manager = manager;
-		this.maxSequenceLength = maxSequenceLength;
+
+		this.inputs = new Inputs({ maxInputSequenceLength: maxSequenceLength, maxReleaseSequenceLength: maxSequenceLength });
 
 		this.keyDown = this.keyDown.bind(this);
 		this.keyUp = this.keyUp.bind(this);
@@ -51,33 +66,33 @@ export class KeyboardLayer {
 
 	/** Check if a key is pressed by both code and key */
 	isPressed(key: Key): boolean {
-		return Array.from(this.pressedKeys).find((k) => k === key) ? true : false;
+		return this.inputs.pressedInputs.has(key);
 	}
 
 	/** Check if a key is pressed by key only */
 	isPressedKey(key: string): boolean {
-		return Array.from(this.pressedKeys).find((k) => k.key === key)
+		return Array.from(this.inputs.pressedInputs).find((k) => k.key === key)
 			? true
 			: false;
 	}
 
 	/** Check if a key is pressed by code only */
 	isPressedCode(code: string): boolean {
-		return Array.from(this.pressedKeys).find((k) => k.code === code)
+		return Array.from(this.inputs.pressedInputs).find((k) => k.code === code)
 			? true
 			: false;
 	}
 
 	/** Pressed keys track the currently held keys (added on keydown, removed on keyup) */
 	getPressedKeys(): Set<Key> {
-		return this.pressedKeys;
+		return this.inputs.pressedInputs;
 	}
 
 	/** The key sequence is the list of keys pressed in order, intended for sequential bindings instead of
 	 * combinatorial bindings. Keys are added on keyup, removed when the length of the recorded seqeunce
 	 * exceeds the maximum length */
 	getKeySequence(): Array<Key> {
-		return this.keySequence;
+		return this.inputs.releasedSequence;
 	}
 
 	private invokeCallbacks(ev: KeyboardEvent, type: KeyboardCallbackType) {
@@ -88,8 +103,8 @@ export class KeyboardLayer {
 				alt: ev.altKey,
 				ctrl: ev.ctrlKey,
 				meta: ev.metaKey,
-			}
-		}
+			},
+		};
 		const filtered = this.callbacks.filter((c) => c.type === type);
 		filtered.forEach((cb) => cb.fn(event));
 	}
@@ -110,26 +125,15 @@ export class KeyboardLayer {
 
 	private keyDown(ev: KeyboardEvent) {
 		this.manager.maybePreventDefault(ev);
-		this.pressedKeys.add({ key: ev.key, code: ev.code });
 		this.invokeCallbacks(ev, "keydown");
-		this.manager.pressInput({ input: ev.code, press: true });
+		this.inputs.press({ input: { key: ev.key, code: ev.code }, name: ev.code });
+		this.manager.pressInput(ev.code);
 	}
 
 	private keyUp(ev: KeyboardEvent) {
 		this.manager.maybePreventDefault(ev);
-		this.pressedKeys.delete({ key: ev.key, code: ev.code });
-		this.keySequence.push({ key: ev.key, code: ev.code });
 		this.invokeCallbacks(ev, "keyup");
-		this.cullKeySequence();
-		this.manager.releaseInput({ input: ev.code, press: false });
-	}
-
-	private cullKeySequence() {
-		if (this.keySequence.length > this.maxSequenceLength) {
-			this.keySequence = this.keySequence.slice(
-				this.keySequence.length - this.maxSequenceLength,
-				this.keySequence.length,
-			);
-		}
+		this.inputs.unpress({ input: { key: ev.key, code: ev.code }, name: ev.code });
+		this.manager.releaseInput(ev.code);
 	}
 }

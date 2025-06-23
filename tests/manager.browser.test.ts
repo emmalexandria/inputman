@@ -75,4 +75,4 @@ test("Test basic sequential binding", async () => {
 });
 
 // Unfortunately, we don't currently have a way to test mouse movement to my knowledge. Test is left as a reminder.
-test("Test mouse movement callbacks", async () => { });
+test("Test mouse movement callbacks", async () => {});

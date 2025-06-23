@@ -1,15 +1,13 @@
 // Most of this file is concerned with parsing binding strings. I don't trust regexes so we're doing this the old fashioned way.
 
-import type { Key } from "./layers/keyboard";
-import type { Input } from "./manager";
-import { arrayContainsOrd } from "./util";
+import { arrayEqual2d } from "./util";
 
 const SEPERATOR_SIMULTANEOUS = "+";
 const SEPERATOR_SEQUENTIAL = ">";
 
 type BSeperator = "simultaneous" | "sequential";
 
-/** Internally, inputman represents bindings as a 2D array of strings in which each inner array represents a group of 
+/** Internally, inputman represents bindings as a 2D array of strings in which each inner array represents a group of
  * simultaneous inputs. Multiple arrays then represent sets of simultaneous inputs connected sequentially*/
 export type BindingDescriptor = string[][];
 
@@ -18,36 +16,28 @@ export type BindingFn = () => void;
 export class Binding {
 	fn: BindingFn;
 	value?: number;
-	sequential: boolean = false;
-	keys: string[][];
-	name?: string;
+	descriptor: BindingDescriptor;
 
 	constructor(
-		keys: string[][],
+		descriptor: BindingDescriptor,
 		fn: BindingFn,
-		sequential: boolean = false,
-		name?: string,
 	) {
-		this.keys = keys;
+		this.descriptor = descriptor;
 		this.fn = fn;
-		this.name = name;
-		this.sequential = sequential;
 	}
 
-	matches(input: Input[]) {
-		return true;
+	matches(input: BindingDescriptor) {
+		return arrayEqual2d(input, this.descriptor);
 	}
 }
 
-export function parseBinding(
-	binding: string,
-): BindingDescriptor {
+export function parseBinding(binding: string): BindingDescriptor {
 	const split = splitBinding(binding);
-	const groups: BindingDescriptor = []
+	const groups: BindingDescriptor = [];
 
 	let curr_group: string[] = [];
 	let idx = 0;
-	for (let w of split) {
+	for (const w of split) {
 		const word = w.trim();
 		if (word === SEPERATOR_SEQUENTIAL) {
 			if (curr_group.length > 0) {
@@ -65,33 +55,21 @@ export function parseBinding(
 		groups.push(curr_group);
 	}
 
-	return groups
-}
-
-export function parseInputSequence(input: Input[]): BindingDescriptor {
-	const ret: string[][] = [];
-
-	return ret;
-}
-
-/** Internal function to check if one binding descriptor (converted from a series of inputs) contains another binding descriptor.
- * Used internally in bindings to check if they match the current input state */
-export function inputContainsOrdered(outer: BindingDescriptor, inner: BindingDescriptor): boolean {
-	return true;
+	return groups;
 }
 
 export function splitBinding(binding: string): string[] {
 	const split = [];
 	let currWord: string = "";
 
-	for (let c of binding) {
+	for (const c of binding) {
 		if (c === SEPERATOR_SIMULTANEOUS || c === SEPERATOR_SEQUENTIAL) {
 			if (currWord.length > 0) {
 				split.push(currWord.trim());
 				currWord = "";
 			}
-			split.push(c)
-			continue
+			split.push(c);
+			continue;
 		}
 
 		currWord += c;
@@ -101,7 +79,7 @@ export function splitBinding(binding: string): string[] {
 		split.push(currWord);
 	}
 
-	return split
+	return split;
 }
 
 export function createBinding(
@@ -110,5 +88,5 @@ export function createBinding(
 ): Binding | undefined {
 	const bindingGroups = parseBinding(binding);
 
-	return new Binding(bindingGroups, fn)
+	return new Binding(bindingGroups, fn);
 }
