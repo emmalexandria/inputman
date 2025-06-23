@@ -106,13 +106,13 @@ export class MouseLayer {
 	private mouseDown(ev: MouseEvent) {
 		this.invokeCallbacks(ev, "mousedown");
 		const name = getMouseButtonName(ev.button);
-		this.manager.pressInput({ input: name, press: true });
+		this.manager.pressInput(name);
 	}
 
 	private mouseUp(ev: MouseEvent) {
 		this.invokeCallbacks(ev, "mouseup");
 		const name = getMouseButtonName(ev.button);
-		this.manager.releaseInput({ input: name, press: true });
+		this.manager.releaseInput(name);
 	}
 
 	private mouseMove(ev: MouseEvent) {

@@ -91,28 +91,39 @@ export class Inputs<T> {
 		}
 	}
 
-	toBindingDescriptor(num: number = -1): BindingDescriptor {
+	/** Converts the input sequence to a binding descriptor for use with matching bindings */
+	//This is a really simple algorithm, but it was quite a pain in the ass to implement so it'll be commented extensively
+	toBindingDescriptor(numGroups: number): BindingDescriptor {
+		// The final result we return
 		const result: BindingDescriptor = [];
+		// The list of held keys
 		const held: Set<string> = new Set();
-		let lastGroup: string[] | null = null
+		// Whether the last input was a press or unpress
+		let lastPressed: boolean = false;
 
-		let inputSequence = this._inputSequence;
-		if (num > 0) {
-			inputSequence = this._inputSequence.slice(this._inputSequence.length - num);
-		}
-
-		for (const input of inputSequence) {
+		for (const input of this._inputSequence) {
+			// Add to held if its a press
 			if (input.press) {
 				held.add(input.name);
-
-				result.push([...held])
-
+				lastPressed = true;
 			} else {
+				// If held is not emtpy and the last is not pressed, we add the held keys to the result
+				// We only do if if the last was a press to prevent releasing multiple keys causing random groups
+				if (held.size > 0 && lastPressed) {
+					result.push([...held]);
+				}
 				held.delete(input.name);
+				lastPressed = false
 			}
 		}
 
-		return result;
+		// Last push because we may not encounter a key unpress at thet end
+		if (held.size > 0) {
+			result.push([...held])
+		}
+
+		// Return only the last slice of the result that we care about (matches the length of the binding)
+		return result.slice(result.length - numGroups);
 	}
 
 	private cullSequences() {

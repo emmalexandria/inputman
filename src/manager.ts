@@ -1,4 +1,5 @@
 import { Binding, createBinding, type BindingFn } from "./bindings";
+import { Inputs } from "./input";
 import { KeyboardLayer } from "./layers/keyboard";
 import { MouseLayer } from "./layers/mouse";
 
@@ -11,28 +12,17 @@ export interface InputManConfig {
 	sequenceTimer?: number;
 }
 
-export interface Input {
-	input: string;
-	press: boolean;
-}
-
 export class InputMan {
 	keyboard: KeyboardLayer;
 	mouse: MouseLayer;
 
-	private inputs: Array<Input> = [];
-
+	private inputs: Inputs<string>;
 	private preventsDefault: boolean;
-	private pressedInputs: Set<Input> = new Set();
-	inputSequence: Array<Input> = [];
-	private sequenceTimer: number;
-	private maxSequenceLength: number;
 	private bindings: Set<Binding> = new Set();
 
 	constructor(target: Window | HTMLElement, config?: InputManConfig) {
 		this.preventsDefault = config?.preventsDefault ?? true;
-		this.maxSequenceLength = config?.maxSequenceLength ?? 5;
-		this.sequenceTimer = config?.sequenceTimer ?? 200;
+		this.inputs = new Inputs({ maxInputSequenceLength: config?.maxSequenceLength, maxReleaseSequenceLength: config?.maxSequenceLength, releaseSequenceTimer: config?.sequenceTimer })
 
 		this.keyboard = new KeyboardLayer(this, target, config?.maxSequenceLength);
 		this.mouse = new MouseLayer(this, target);
@@ -49,7 +39,7 @@ export class InputMan {
 
 	private invokeBindings() {
 		for (const binding of this.bindings) {
-			if (binding.matches(Array.from(this.pressedInputs))) {
+			if (binding.matches(this.inputs.toBindingDescriptor(binding.descriptor.length))) {
 				binding.fn();
 			}
 		}
@@ -60,28 +50,13 @@ export class InputMan {
 		return this.preventsDefault;
 	}
 
-	pressInput(name: Input) {
-		this.pressedInputs.add(name);
+	pressInput(name: string) {
+		this.inputs.press({ name, input: name });
 		this.invokeBindings();
 	}
 
-	releaseInput(name: Input) {
-		this.pressedInputs.delete(name);
-		this.addToSequence(name);
+	releaseInput(name: string) {
+		this.inputs.unpress({ name, input: name });
 		this.invokeBindings();
-	}
-
-	private addToSequence(input: Input) {
-		this.inputSequence.push(input);
-		const idx = this.inputSequence.length - 1;
-		setTimeout(() => {
-			this.inputSequence.splice(idx, 1);
-		}, this.sequenceTimer);
-		if (this.inputSequence.length > this.maxSequenceLength) {
-			this.inputSequence = this.inputSequence.slice(
-				this.inputSequence.length - this.maxSequenceLength,
-				this.inputSequence.length,
-			);
-		}
 	}
 }

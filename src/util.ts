@@ -14,6 +14,27 @@ export function arrayContainsOrd<T>(outer: T[], inner: T[]): boolean {
 	return false;
 }
 
+export function arrayEqual2d<T>(a: T[][], b: T[][]): boolean {
+	if (a.length !== b.length) return false;
+
+	for (let i = 0; i < a.length; i++) {
+		// We know rowA is defined, so !
+		const rowA = a[i]!;
+		const rowB = b[i];
+
+		// If rowB is not defined, we already know the arrays are not equal
+		if (!rowB) return false;
+		// And if they have different lengths, they are also not equal
+		if (rowA.length !== rowB.length) return false;
+
+		for (let j = 0; j < rowA.length; j++) {
+			if (rowA[j] !== rowB[j]) return false;
+		}
+	}
+
+	return true
+}
+
 export function arraysEqual<T>(array1: T[], array2: T[]): boolean {
 	return (
 		array1.length === array2.length &&

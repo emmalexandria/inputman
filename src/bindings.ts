@@ -1,8 +1,6 @@
 // Most of this file is concerned with parsing binding strings. I don't trust regexes so we're doing this the old fashioned way.
 
-import type { Key } from "./layers/keyboard";
-import type { Input } from "./manager";
-import { arrayContainsOrd } from "./util";
+import { arrayEqual2d } from "./util";
 
 const SEPERATOR_SIMULTANEOUS = "+";
 const SEPERATOR_SEQUENTIAL = ">";
@@ -18,18 +16,18 @@ export type BindingFn = () => void;
 export class Binding {
 	fn: BindingFn;
 	value?: number;
-	keys: string[][];
+	descriptor: BindingDescriptor;
 
 	constructor(
-		keys: string[][],
+		descriptor: BindingDescriptor,
 		fn: BindingFn,
 	) {
-		this.keys = keys;
+		this.descriptor = descriptor;
 		this.fn = fn;
 	}
 
-	matches(input: Input[]) {
-		return true;
+	matches(input: BindingDescriptor) {
+		return arrayEqual2d(input, this.descriptor);
 	}
 }
 
@@ -58,21 +56,6 @@ export function parseBinding(binding: string): BindingDescriptor {
 	}
 
 	return groups;
-}
-
-export function parseInputSequence(input: Input[]): BindingDescriptor {
-	const ret: string[][] = [];
-
-	return ret;
-}
-
-/** Internal function to check if one binding descriptor (converted from a series of inputs) contains another binding descriptor.
- * Used internally in bindings to check if they match the current input state */
-export function inputContainsOrdered(
-	outer: BindingDescriptor,
-	inner: BindingDescriptor,
-): boolean {
-	return true;
 }
 
 export function splitBinding(binding: string): string[] {

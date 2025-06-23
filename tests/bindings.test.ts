@@ -48,13 +48,13 @@ test("Test parsing binding beginning with combinators", () => {
 });
 
 test("Test single binding creation", () => {
-	let binding = createBinding("KeyW", () => {});
+	let binding = createBinding("KeyW", () => { });
 
-	expect(binding?.keys).toStrictEqual([["KeyW"]]);
+	expect(binding?.descriptor).toStrictEqual([["KeyW"]]);
 });
 
 test("Test combination binding creation", () => {
-	let binding = createBinding("ShiftLeft+KeyW", () => {});
+	let binding = createBinding("ShiftLeft+KeyW", () => { });
 
-	expect(binding?.keys).toStrictEqual([["ShiftLeft", "KeyW"]]);
+	expect(binding?.descriptor).toStrictEqual([["ShiftLeft", "KeyW"]]);
 });
