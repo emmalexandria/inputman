@@ -11,7 +11,7 @@ export interface Key {
 
 export class KeyInput implements Input<Key> {
 	input: Key;
-	press?: boolean
+	press?: boolean;
 	name: string;
 
 	constructor(key: Key, press?: boolean, name?: string) {
@@ -50,7 +50,10 @@ export class KeyboardLayer {
 	) {
 		this.manager = manager;
 
-		this.inputs = new Inputs({ maxInputSequenceLength: maxSequenceLength, maxReleaseSequenceLength: maxSequenceLength });
+		this.inputs = new Inputs({
+			maxInputSequenceLength: maxSequenceLength,
+			maxReleaseSequenceLength: maxSequenceLength,
+		});
 
 		this.keyDown = this.keyDown.bind(this);
 		this.keyUp = this.keyUp.bind(this);
@@ -133,7 +136,10 @@ export class KeyboardLayer {
 	private keyUp(ev: KeyboardEvent) {
 		this.manager.maybePreventDefault(ev);
 		this.invokeCallbacks(ev, "keyup");
-		this.inputs.unpress({ input: { key: ev.key, code: ev.code }, name: ev.code });
+		this.inputs.unpress({
+			input: { key: ev.key, code: ev.code },
+			name: ev.code,
+		});
 		this.manager.releaseInput(ev.code);
 	}
 }

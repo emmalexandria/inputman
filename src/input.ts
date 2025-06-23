@@ -113,13 +113,13 @@ export class Inputs<T> {
 					result.push([...held]);
 				}
 				held.delete(input.name);
-				lastPressed = false
+				lastPressed = false;
 			}
 		}
 
 		// Last push because we may not encounter a key unpress at thet end
 		if (held.size > 0) {
-			result.push([...held])
+			result.push([...held]);
 		}
 
 		// Return only the last slice of the result that we care about (matches the length of the binding)

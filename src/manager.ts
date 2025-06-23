@@ -22,7 +22,11 @@ export class InputMan {
 
 	constructor(target: Window | HTMLElement, config?: InputManConfig) {
 		this.preventsDefault = config?.preventsDefault ?? true;
-		this.inputs = new Inputs({ maxInputSequenceLength: config?.maxSequenceLength, maxReleaseSequenceLength: config?.maxSequenceLength, releaseSequenceTimer: config?.sequenceTimer })
+		this.inputs = new Inputs({
+			maxInputSequenceLength: config?.maxSequenceLength,
+			maxReleaseSequenceLength: config?.maxSequenceLength,
+			releaseSequenceTimer: config?.sequenceTimer,
+		});
 
 		this.keyboard = new KeyboardLayer(this, target, config?.maxSequenceLength);
 		this.mouse = new MouseLayer(this, target);
@@ -39,7 +43,11 @@ export class InputMan {
 
 	private invokeBindings() {
 		for (const binding of this.bindings) {
-			if (binding.matches(this.inputs.toBindingDescriptor(binding.descriptor.length))) {
+			if (
+				binding.matches(
+					this.inputs.toBindingDescriptor(binding.descriptor.length),
+				)
+			) {
 				binding.fn();
 			}
 		}

@@ -32,7 +32,7 @@ export function arrayEqual2d<T>(a: T[][], b: T[][]): boolean {
 		}
 	}
 
-	return true
+	return true;
 }
 
 export function arraysEqual<T>(array1: T[], array2: T[]): boolean {

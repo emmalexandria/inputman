@@ -74,7 +74,8 @@ export class MouseLayer {
 	}
 
 	removeCallback(cb: MouseCallback) {
-		const idx = this.callbacks.filter((c) => c !== cb);
+		const idx = this.callbacks.findIndex((c) => c !== cb);
+		this.callbacks.splice(idx, 1);
 	}
 
 	private invokeCallbacks(ev: MouseEvent | Event, type: MouseCallbackType) {

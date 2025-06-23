@@ -5,8 +5,6 @@ import { arrayEqual2d } from "./util";
 const SEPERATOR_SIMULTANEOUS = "+";
 const SEPERATOR_SEQUENTIAL = ">";
 
-type BSeperator = "simultaneous" | "sequential";
-
 /** Internally, inputman represents bindings as a 2D array of strings in which each inner array represents a group of
  * simultaneous inputs. Multiple arrays then represent sets of simultaneous inputs connected sequentially*/
 export type BindingDescriptor = string[][];
@@ -18,10 +16,7 @@ export class Binding {
 	value?: number;
 	descriptor: BindingDescriptor;
 
-	constructor(
-		descriptor: BindingDescriptor,
-		fn: BindingFn,
-	) {
+	constructor(descriptor: BindingDescriptor, fn: BindingFn) {
 		this.descriptor = descriptor;
 		this.fn = fn;
 	}
@@ -36,7 +31,6 @@ export function parseBinding(binding: string): BindingDescriptor {
 	const groups: BindingDescriptor = [];
 
 	let curr_group: string[] = [];
-	let idx = 0;
 	for (const w of split) {
 		const word = w.trim();
 		if (word === SEPERATOR_SEQUENTIAL) {
@@ -47,8 +41,6 @@ export function parseBinding(binding: string): BindingDescriptor {
 		} else if (word !== SEPERATOR_SIMULTANEOUS) {
 			curr_group.push(word);
 		}
-
-		idx++;
 	}
 
 	if (curr_group.length > 0) {
