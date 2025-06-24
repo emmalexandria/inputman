@@ -15,7 +15,9 @@
 
 ## Usage/Examples
 
-`inputman` unfortunately currently lacks complete documentation. However, it is relatively intuitive when used with an LSP. In addition, the source-code is pretty small, so if you can't figure out how to do something it should be easy to work out.
+`inputman` unfortunately currently lacks complete documentation. However, it is relatively intuitive when used with an LSP. In addition, the source-code is pretty small, so if you can't figure out how to do something it should be easy to work out. 
+
+Although the project is built to Javascript with a type declaration file, I would strongly recommend using the project from Typescript. This is because Typescript does not build private fields to # fields, so in Javascript you might accidentally mess with something internal. As always with Javascript, be cautious!
 
 ### Basic keyboard callback
 This code example will run a callback every time a keydown event happens.
