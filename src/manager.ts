@@ -28,8 +28,8 @@ export class InputMan {
 			releaseSequenceTimer: config?.sequenceTimer,
 		});
 
-		this.keyboard = new KeyboardLayer(this, target, config?.maxSequenceLength);
-		this.mouse = new MouseLayer(this, target);
+		this.keyboard = new KeyboardLayer(target, this, config?.maxSequenceLength);
+		this.mouse = new MouseLayer(target, this);
 	}
 
 	registerBinding(binding: string, fn: BindingFn): boolean {

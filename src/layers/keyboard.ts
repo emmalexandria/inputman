@@ -36,16 +36,17 @@ export type KeyboardCallbackType = "keydown" | "keyup";
 interface KeyboardCallback {
 	type: KeyboardCallbackType;
 	fn: KeyboardCallbackFn;
+	repeat: boolean
 }
 
 export class KeyboardLayer {
-	private manager: InputMan;
+	private manager?: InputMan;
 	private callbacks: Array<KeyboardCallback> = [];
 	private inputs: Inputs<Key>;
 
 	constructor(
-		manager: InputMan,
 		target: HTMLElement | Window,
+		manager?: InputMan,
 		maxSequenceLength = 5,
 	) {
 		this.manager = manager;
@@ -115,31 +116,35 @@ export class KeyboardLayer {
 	registerCallback(
 		cb: KeyboardCallbackFn,
 		type: KeyboardCallbackType = "keydown",
+		repeat: boolean = true
 	) {
 		this.callbacks.push({
 			fn: cb,
 			type,
+			repeat
 		});
 	}
 
-	removeCallback(cb: KeyboardCallback) {
-		this.callbacks = this.callbacks.filter((c) => c !== cb);
+	removeCallback(cb: KeyboardCallbackFn, type: KeyboardCallbackType = "keydown", repeat: boolean = true) {
+		this.callbacks = this.callbacks.filter((c) => {
+			return !(c.fn === cb && c.type === type && c.repeat === repeat)
+		});
 	}
 
 	private keyDown(ev: KeyboardEvent) {
-		this.manager.maybePreventDefault(ev);
+		this.manager?.maybePreventDefault(ev);
 		this.invokeCallbacks(ev, "keydown");
 		this.inputs.press({ input: { key: ev.key, code: ev.code }, name: ev.code });
-		this.manager.pressInput(ev.code);
+		this.manager?.pressInput(ev.code);
 	}
 
 	private keyUp(ev: KeyboardEvent) {
-		this.manager.maybePreventDefault(ev);
+		this.manager?.maybePreventDefault(ev);
 		this.invokeCallbacks(ev, "keyup");
 		this.inputs.unpress({
 			input: { key: ev.key, code: ev.code },
 			name: ev.code,
 		});
-		this.manager.releaseInput(ev.code);
+		this.manager?.releaseInput(ev.code);
 	}
 }

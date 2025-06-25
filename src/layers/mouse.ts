@@ -31,12 +31,12 @@ interface MouseCallback {
 
 export class MouseLayer {
 	state: MouseState;
-	manager: InputMan;
+	manager?: InputMan;
 	private _cursorLocked: boolean = false;
 	private callbacks: Array<MouseCallback> = [];
 	private target: Window | HTMLElement;
 
-	constructor(manager: InputMan, target: Window | HTMLElement) {
+	constructor(target: Window | HTMLElement, manager?: InputMan) {
 		this.manager = manager;
 		this.target = target;
 
@@ -107,13 +107,15 @@ export class MouseLayer {
 	private mouseDown(ev: MouseEvent) {
 		this.invokeCallbacks(ev, "mousedown");
 		const name = getMouseButtonName(ev.button);
-		this.manager.pressInput(name);
+		this.manager?.maybePreventDefault(ev)
+		this.manager?.pressInput(name);
 	}
 
 	private mouseUp(ev: MouseEvent) {
 		this.invokeCallbacks(ev, "mouseup");
 		const name = getMouseButtonName(ev.button);
-		this.manager.releaseInput(name);
+		this.manager?.maybePreventDefault(ev)
+		this.manager?.releaseInput(name);
 	}
 
 	private mouseMove(ev: MouseEvent) {

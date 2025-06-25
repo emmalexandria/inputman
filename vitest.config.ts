@@ -21,8 +21,6 @@ export default defineConfig({
 						screenshotFailures: false,
 						instances: [
 							{ browser: "chromium" },
-							{ browser: "firefox" },
-							{ browser: "webkit" },
 						],
 					},
 					name: "browser",

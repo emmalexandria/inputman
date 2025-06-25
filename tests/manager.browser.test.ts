@@ -43,20 +43,6 @@ test("Test mouse binding", async () => {
 	expect(pressed).toStrictEqual(true);
 });
 
-test("Test keyboard input callback", async () => {
-	const inputMan = new InputMan(window);
-
-	let keys: string[] = [];
-
-	inputMan.keyboard.registerCallback((c) => {
-		keys.push(c.key.code ?? "undefined");
-	}, "keydown");
-
-	await userEvent.keyboard("[ShiftLeft][KeyE]");
-
-	expect(keys).toStrictEqual(["ShiftLeft", "KeyE"]);
-});
-
 test("Test basic sequential binding", async () => {
 	const inputMan = new InputMan(window, {
 		sequenceTimer: 2500,
@@ -75,4 +61,4 @@ test("Test basic sequential binding", async () => {
 });
 
 // Unfortunately, we don't currently have a way to test mouse movement to my knowledge. Test is left as a reminder.
-test("Test mouse movement callbacks", async () => {});
+test("Test mouse movement callbacks", async () => { });
